@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.6)
 project (EntitySystem)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -g")
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
 file(GLOB_RECURSE TEST_SOURCES src_test/*.cpp)

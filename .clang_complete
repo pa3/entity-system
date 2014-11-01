@@ -1,0 +1,5 @@
+-std=c++11
+-Isrc
+-Isrc_test
+-Ithirdparty/gmock-1.7.0/include
+-Ithirdparty/gmock-1.7.0/gtest/include
