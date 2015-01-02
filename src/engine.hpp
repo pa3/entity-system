@@ -1,5 +1,6 @@
 #pragma once
 #include "entity.hpp"
+#include "system.hpp"
 #include "component_family_id.hpp"
 #include <unordered_set>
 #include <memory>
@@ -21,10 +22,15 @@ class Engine : public EntityChangesListener {
   unordered_set<Entity *> getEntities();
 
   void componentsChanged( Entity * );
+
+  void addSystem( unique_ptr<System> s );
+
+  void update( double deltaTime );
   
  private:
   unordered_map<int, unique_ptr<ComponentFamily>> familyById ; 
   unordered_set<unique_ptr<Entity>> entities;
+  vector<System*> systems;
 };
 
 template <class ... T>

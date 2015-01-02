@@ -34,3 +34,15 @@ std::unordered_set<Entity *> Engine::getEntities() {
   }
   return result;
 }
+
+void Engine::addSystem(unique_ptr<System> s) {
+  auto* system = s.release();
+  systems.push_back(system);
+  system->setEngine(this);
+}
+
+void Engine::update(double deltaTime) {
+  for ( auto* s : systems ) {
+    s->update( deltaTime );
+  }
+}

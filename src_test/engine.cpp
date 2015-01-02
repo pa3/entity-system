@@ -49,6 +49,24 @@ class EngineWithNoEntities : public ::testing::Test {
   Engine engine;
 };
 
+
+class EngineWithThreeSystems : public ::testing::Test {
+ public:
+  Engine engine;
+  SpySystem *system1, *system2, *system3;
+  OrderSpy orderSpy;
+
+  virtual void SetUp() {
+    system1 = new SpySystem( orderSpy );
+    system2 = new SpySystem( orderSpy );
+    system3 = new SpySystem( orderSpy );
+    
+    engine.addSystem( unique_ptr<System>(system1) );
+    engine.addSystem( unique_ptr<System>(system2) );
+    engine.addSystem( unique_ptr<System>(system3) );
+  }
+};
+
 TEST_F(EngineWithThreeEntities, whenRemovedAllEntities_engineHaveNoEntities) {
   engine.removeEntity(e1);
   engine.removeEntity(e2);
@@ -117,4 +135,33 @@ TEST_F(EngineWithThreeEntities, whenEntityAdded_thisEntityPresentsInFilterResult
   
   auto filteredEntities = engine.filterEntities<TestComponent1>();
   ASSERT_THAT(filteredEntities, UnorderedElementsAre(e1, e2, e3, addedEntity));
+}
+
+TEST_F(EngineWithThreeSystems, whenEngineUpdated_systemsUpdatedInTheOrderTheyWereRegistered)
+{
+  engine.update(1.0);
+
+  ASSERT_THAT( orderSpy.getSystemsUpdateOrder(), ElementsAre( system1, system2, system3 ));
+}
+
+TEST_F(EngineWithThreeSystems, whenEngineUpdated_systemsRecieveCorrectDeltaTime) {
+  engine.update(2.0);
+  ASSERT_THAT( system1->lastDeltaTime, Eq(2.0));
+  ASSERT_THAT( system2->lastDeltaTime, Eq(2.0));
+  ASSERT_THAT( system3->lastDeltaTime, Eq(2.0));
+}
+
+TEST_F(EngineWithThreeSystems, whenSystemIsAddedToEngine_engineInstanceProvidedToSystem) {
+  ASSERT_THAT( system1->getEngine(), Eq( &engine ));
+  ASSERT_THAT( system2->getEngine(), Eq( &engine ));
+  ASSERT_THAT( system3->getEngine(), Eq( &engine ));
+}
+
+// TODO: should I introduce separate place for integrational tests
+// like this one?
+TEST_F(EngineWithThreeSystems, systemCanNicelyRemovesEntitiesDuringUpdate) {
+  System * removingSystem = new EntitiesRemovingSystemFake();
+  engine.addSystem(unique_ptr<System>(removingSystem));
+
+  engine.update(1.0);
 }
